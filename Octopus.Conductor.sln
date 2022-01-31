@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Core", "O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Infrastructure", "Octopus.Conductor.Infrastructure\Octopus.Conductor.Infrastructure.csproj", "{711CE993-C06C-446E-A85D-CCCE7F3A249A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.WebApi", "Octopus.Conductor.WebApi\Octopus.Conductor.WebApi.csproj", "{725E6E64-75FC-494E-897D-F3EE3134CA11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{711CE993-C06C-446E-A85D-CCCE7F3A249A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{711CE993-C06C-446E-A85D-CCCE7F3A249A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{711CE993-C06C-446E-A85D-CCCE7F3A249A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{725E6E64-75FC-494E-897D-F3EE3134CA11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{725E6E64-75FC-494E-897D-F3EE3134CA11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{725E6E64-75FC-494E-897D-F3EE3134CA11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{725E6E64-75FC-494E-897D-F3EE3134CA11}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +36,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{ABCD5411-4792-40AB-95C0-14CBB770C81C} = {50A7155F-1A28-4ED6-9DC8-00637D741065}
 		{711CE993-C06C-446E-A85D-CCCE7F3A249A} = {50A7155F-1A28-4ED6-9DC8-00637D741065}
+		{725E6E64-75FC-494E-897D-F3EE3134CA11} = {50A7155F-1A28-4ED6-9DC8-00637D741065}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5037395-1809-4148-A8EB-0523B0AAC1FE}
