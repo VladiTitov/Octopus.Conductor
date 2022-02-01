@@ -11,13 +11,13 @@ namespace Octopus.Conductor.WebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ManageController : ControllerBase
+    public class ManagementController : ControllerBase
     {
-        private readonly ILogger<ManageController> _logger;
+        private readonly ILogger<ManagementController> _logger;
         private readonly IHostedService _hostedService;
 
-        public ManageController(
-            ILogger<ManageController> logger, 
+        public ManagementController(
+            ILogger<ManagementController> logger, 
             IHostedService hostedService)
         {
             _logger = logger;
