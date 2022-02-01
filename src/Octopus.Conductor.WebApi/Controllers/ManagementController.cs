@@ -17,7 +17,7 @@ namespace Octopus.Conductor.WebApi.Controllers
         private readonly IHostedService _hostedService;
 
         public ManagementController(
-            ILogger<ManagementController> logger, 
+            ILogger<ManagementController> logger,
             IHostedService hostedService)
         {
             _logger = logger;
