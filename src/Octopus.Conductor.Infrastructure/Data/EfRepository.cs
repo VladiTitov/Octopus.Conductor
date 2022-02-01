@@ -20,27 +20,34 @@ namespace Octopus.Conductor.Infrastructure.Data
             _context = context;
         }
 
-        public async Task<TEntity> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken=default) where TEntity : BaseEntity
+        public async Task<TEntity> AddAsync<TEntity>(
+            TEntity entity,
+            CancellationToken cancellationToken=default) where TEntity : BaseEntity
         {
             await _context.Set<TEntity>().AddAsync(entity,cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             return entity;
         }
 
-        public async Task DeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : BaseEntity
+        public async Task DeleteAsync<TEntity>(
+            TEntity entity,
+            CancellationToken cancellationToken = default) where TEntity : BaseEntity
         {
             _context.Set<TEntity>().Remove(entity);
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(CancellationToken cancellationToken = default) where TEntity : BaseEntity
+        public async Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(
+            CancellationToken cancellationToken = default) where TEntity : BaseEntity
         {
             return await _context.Set<TEntity>().ToListAsync(cancellationToken);
         }
 
-        public async Task<TEntity> GetByIdAsync<TEntity>(int id, CancellationToken cancellationToken = default) where TEntity : BaseEntity
+        public async Task<TEntity> GetByIdAsync<TEntity>(
+            int id,
+            CancellationToken cancellationToken = default) where TEntity : BaseEntity
         {
-            return await _context.Set<TEntity>().FirstOrDefaultAsync(entity => entity.Id == id,cancellationToken);
+            return await _context.Set<TEntity>().FindAsync(id);
         }
     }
 }
