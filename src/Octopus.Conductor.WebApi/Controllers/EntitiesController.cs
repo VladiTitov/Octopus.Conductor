@@ -48,7 +48,5 @@ namespace Octopus.Conductor.WebApi.Controllers
             var entity=await _repository.GetByIdAsync<EntityDescription>(id);
             return Ok(_mapper.Map<ReadEntityDescriptionDto>(entity));
         }
-
-        
     }
 }
