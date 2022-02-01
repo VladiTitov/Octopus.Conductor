@@ -13,8 +13,8 @@ namespace Octopus.Conductor.WebApi.Profiles
     {
         public EntityDescriptionProfile()
         {
-            CreateMap<CreateEntityDescriptionDto, EntityDescription>();
-            CreateMap<EntityDescription, ReadEntityDescriptionDto>();
+            CreateMap<CreateEntityDescriptionDto, ConductorEntityDescription>();
+            CreateMap<ConductorEntityDescription, ReadEntityDescriptionDto>();
         }
     }
 }

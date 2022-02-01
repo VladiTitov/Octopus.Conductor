@@ -14,7 +14,7 @@ namespace Octopus.Conductor.Infrastructure.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {}
 
-        public DbSet<EntityDescription> EntityDescriptions { get; set; }
+        public DbSet<ConductorEntityDescription> EntityDescriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

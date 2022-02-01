@@ -4,9 +4,9 @@ using Octopus.Conductor.Core.Entities;
 
 namespace Octopus.Conductor.Infrastructure.Config
 {
-    public class EntityDescriptionConfig : IEntityTypeConfiguration<EntityDescription>
+    public class EntityDescriptionConfig : IEntityTypeConfiguration<ConductorEntityDescription>
     {
-        public void Configure(EntityTypeBuilder<EntityDescription> builder)
+        public void Configure(EntityTypeBuilder<ConductorEntityDescription> builder)
         {
             builder.HasKey(entity => entity.Id);
             builder.Property(entity => entity.EntityType).IsRequired();

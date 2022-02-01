@@ -2,7 +2,7 @@
 
 namespace Octopus.Conductor.Core.Entities
 {
-    public class EntityDescription : BaseEntity
+    public class ConductorEntityDescription : BaseEntity
     {
         public string EntityType { get; set; }
         public string InputDirectory { get; set; }

@@ -29,14 +29,14 @@ namespace Octopus.Conductor.WebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadEntityDescriptionDto>>> GetAllEntities()
         {
-            var entities = await _repository.GetAllAsync<EntityDescription>();
+            var entities = await _repository.GetAllAsync<ConductorEntityDescription>();
             return Ok(_mapper.Map<IEnumerable<ReadEntityDescriptionDto>>(entities));
         }
 
         [HttpPost]
         public async Task<ActionResult<CreateEntityDescriptionDto>> CreateEntity([FromBody] CreateEntityDescriptionDto entityDescriptionDto)
         {
-            var entity = _mapper.Map<EntityDescription>(entityDescriptionDto);
+            var entity = _mapper.Map<ConductorEntityDescription>(entityDescriptionDto);
             await _repository.AddAsync(entity);
             await _repository.SaveChangesAsync();
             var readEntityDto = _mapper.Map<ReadEntityDescriptionDto>(entity);
@@ -46,7 +46,7 @@ namespace Octopus.Conductor.WebApi.Controllers
         [HttpGet("{id}", Name = "GetEntityById")]
         public async Task<ActionResult<ReadEntityDescriptionDto>> GetEntityById(int id)
         {
-            var entity = await _repository.GetByIdAsync<EntityDescription>(id);
+            var entity = await _repository.GetByIdAsync<ConductorEntityDescription>(id);
             return Ok(_mapper.Map<ReadEntityDescriptionDto>(entity));
         }
     }

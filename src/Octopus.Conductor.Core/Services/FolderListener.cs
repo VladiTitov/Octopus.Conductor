@@ -8,7 +8,7 @@ namespace Octopus.Conductor.Core.Services
 {
     public class FolderListener : IFolderListener
     {
-        public async Task MoveEntityFilesAsync(IEnumerable<EntityDescription> descriptions)
+        public async Task MoveEntityFilesAsync(IEnumerable<ConductorEntityDescription> descriptions)
         {
             var tasksList = new List<Task>();
 
@@ -20,7 +20,7 @@ namespace Octopus.Conductor.Core.Services
             await Task.WhenAll(tasksList);
         }
 
-        private Task MoveFilesFromDirectory(EntityDescription description)
+        private Task MoveFilesFromDirectory(ConductorEntityDescription description)
         {
             return Task.Run(() =>
             {

@@ -6,6 +6,6 @@ namespace Octopus.Conductor.Core.Interfaces
 {
     public interface IFolderListener
     {
-        public Task MoveEntityFilesAsync(IEnumerable<EntityDescription> descriptions);
+        public Task MoveEntityFilesAsync(IEnumerable<ConductorEntityDescription> descriptions);
     }
 }
