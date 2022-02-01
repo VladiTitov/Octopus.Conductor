@@ -25,16 +25,7 @@ namespace Octopus.Conductor.Infrastructure.Data
             CancellationToken cancellationToken=default) where TEntity : BaseEntity
         {
             await _context.Set<TEntity>().AddAsync(entity,cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
             return entity;
-        }
-
-        public async Task DeleteAsync<TEntity>(
-            TEntity entity,
-            CancellationToken cancellationToken = default) where TEntity : BaseEntity
-        {
-            _context.Set<TEntity>().Remove(entity);
-            await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(
@@ -48,6 +39,16 @@ namespace Octopus.Conductor.Infrastructure.Data
             CancellationToken cancellationToken = default) where TEntity : BaseEntity
         {
             return await _context.Set<TEntity>().FindAsync(id);
+        }
+
+        public void Delete<TEntity>(TEntity entity) where TEntity : BaseEntity
+        {
+            _context.Set<TEntity>().Remove(entity);
+        }
+
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

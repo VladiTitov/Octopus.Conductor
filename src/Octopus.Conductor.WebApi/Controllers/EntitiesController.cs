@@ -38,6 +38,7 @@ namespace Octopus.Conductor.WebApi.Controllers
         {
             var entity=_mapper.Map<EntityDescription>(entityDescriptionDto);
             await _repository.AddAsync(entity);
+            await _repository.SaveChangesAsync();
             var readEntityDto=_mapper.Map<ReadEntityDescriptionDto>(entity);
             return CreatedAtRoute(nameof(GetEntityById), new { Id = readEntityDto.Id }, readEntityDto);
         }
