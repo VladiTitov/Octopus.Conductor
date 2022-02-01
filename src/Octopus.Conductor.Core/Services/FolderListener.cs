@@ -11,10 +11,12 @@ namespace Octopus.Conductor.Core.Services
         public async Task MoveEntityFilesAsync(IEnumerable<EntityDescription> descriptions)
         {
             var tasksList = new List<Task>();
+
             foreach (var description in descriptions)
             {
                 tasksList.Add(MoveFilesFromDirectory(description));
             }
+
             await Task.WhenAll(tasksList);
         }
 
