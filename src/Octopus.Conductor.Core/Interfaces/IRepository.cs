@@ -10,12 +10,12 @@ namespace Octopus.Conductor.Core.Interfaces
         Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(
             CancellationToken cancellationToken = default) where TEntity : BaseEntity;
         Task<TEntity> AddAsync<TEntity>(
-            TEntity entity, 
+            TEntity entity,
             CancellationToken cancellationToken = default) where TEntity : BaseEntity;
         Task<TEntity> GetByIdAsync<TEntity>(
             int id,
             CancellationToken cancellationToken = default) where TEntity : BaseEntity;
         void Delete<TEntity>(TEntity entity) where TEntity : BaseEntity;
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken=default);
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

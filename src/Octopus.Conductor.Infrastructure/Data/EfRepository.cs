@@ -22,9 +22,9 @@ namespace Octopus.Conductor.Infrastructure.Data
 
         public async Task<TEntity> AddAsync<TEntity>(
             TEntity entity,
-            CancellationToken cancellationToken=default) where TEntity : BaseEntity
+            CancellationToken cancellationToken = default) where TEntity : BaseEntity
         {
-            await _context.Set<TEntity>().AddAsync(entity,cancellationToken);
+            await _context.Set<TEntity>().AddAsync(entity, cancellationToken);
             return entity;
         }
 
