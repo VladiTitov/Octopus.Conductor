@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Octopus.Conductor.Core.Entities;
 
-namespace Octopus.Conductor.Infrastructure.Config
+namespace Octopus.Conductor.Infrastructure.Data.Config
 {
     public class EntityDescriptionConfig : IEntityTypeConfiguration<ConductorEntityDescription>
     {
