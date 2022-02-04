@@ -37,15 +37,15 @@ namespace Octopus.Conductor.WebApi.Services
                 {
                     try
                     {
-                        _logger.LogInformation($"{DateTime.Now.ToString("hh:mm:ss")} Working...");
                         await DoWorkAsync(stoppingToken).ConfigureAwait(false);
                     }
-                    catch (DirectoryNotFoundException ex)
+                    catch (AggregateException ae)
                     {
-                        _logger.LogError(
+                        foreach (var ex in ae.InnerExceptions)
+                            _logger.LogError(
                             ex,
                             ex.Message,
-                            GetType().Name);
+                            GetType());
                     }
                     catch (OperationCanceledException ex)
                     {
@@ -56,9 +56,9 @@ namespace Octopus.Conductor.WebApi.Services
                         _logger.LogError(
                             ex,
                             ex.Message,
-                            GetType().Name);
+                            GetType());
                     }
-                    await Task.Delay(5000,stoppingToken).ConfigureAwait(false);
+                    await Task.Delay(5000, stoppingToken).ConfigureAwait(false);
                 }
 
                 _logger.LogInformation(
