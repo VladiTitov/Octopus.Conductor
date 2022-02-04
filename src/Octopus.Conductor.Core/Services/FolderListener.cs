@@ -4,7 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,18 +23,7 @@ namespace Octopus.Conductor.Core.Services
             var descriptions = await _repository
                 .GetAllAsync<ConductorEntityDescription>(cancellationToken);
 
-            if (descriptions == null)
-                throw new ArgumentNullException(nameof(descriptions), "Entities descriptions repository is empty");
-
-            try
-            {
-                ProcessDirectoriesInParallel(descriptions, cancellationToken);
-            }
-            catch (AggregateException ae)
-            {
-                foreach (var ex in ae.InnerExceptions)
-                    throw ex;
-            }
+            ProcessDirectoriesInParallel(descriptions, cancellationToken);
         }
 
         private void ProcessDirectoriesInParallel(
@@ -49,19 +37,23 @@ namespace Octopus.Conductor.Core.Services
               {
                   try
                   {
-                      if (!Directory.Exists(desc.InputDirectory))
-                          throw new DirectoryNotFoundException($"Directory: {desc.InputDirectory} doesn't exist");
+                      var files = Directory.GetFiles(desc.InputDirectory, "*.*", SearchOption.AllDirectories);
 
                       if (!Directory.Exists(desc.OutputDirectory))
                           Directory.CreateDirectory(desc.OutputDirectory);
 
-                      var files = Directory.GetFiles(desc.InputDirectory, "*.*", SearchOption.AllDirectories);
-
                       foreach (var file in files)
                       {
-                          cancellationToken.ThrowIfCancellationRequested();
-                          var fileInfo = new FileInfo(file);
-                          File.Move(fileInfo.FullName, Path.Combine(desc.OutputDirectory, fileInfo.Name));
+                          try
+                          {
+                              cancellationToken.ThrowIfCancellationRequested();
+                              var fileInfo = new FileInfo(file);
+                              File.Move(fileInfo.FullName, Path.Combine(desc.OutputDirectory, fileInfo.Name));
+                          }
+                          catch (Exception ex)
+                          {
+                              exceptions.Enqueue(ex);
+                          }
                       }
                   }
                   catch (Exception ex)
