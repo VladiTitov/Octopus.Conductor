@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Octopus.Conductor.Core.Entities;
 using Octopus.Conductor.Core.Interfaces;
+using Octopus.Conductor.WebApi.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,13 +21,16 @@ namespace Octopus.Conductor.WebApi.Services
 
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly WorkerSettings _settings;
 
         public FileMovingBackgroundService(
             IServiceProvider serviceProvider,
-            ILogger<FileMovingBackgroundService> logger)
+            ILogger<FileMovingBackgroundService> logger,
+            IOptions<WorkerSettings> settings)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _settings = settings.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,6 +42,7 @@ namespace Octopus.Conductor.WebApi.Services
                 {
                     try
                     {
+                        _logger.LogInformation($"{DateTime.Now}");
                         await DoWorkAsync(stoppingToken).ConfigureAwait(false);
                     }
                     catch (AggregateException ae)
@@ -58,7 +64,7 @@ namespace Octopus.Conductor.WebApi.Services
                             ex.Message,
                             GetType());
                     }
-                    await Task.Delay(5000, stoppingToken).ConfigureAwait(false);
+                    await Task.Delay(_settings.DelaySeconds * 1000, stoppingToken).ConfigureAwait(false);
                 }
 
                 _logger.LogInformation(
