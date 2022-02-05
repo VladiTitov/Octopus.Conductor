@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using Octopus.Conductor.Core.Interfaces;
 using Octopus.Conductor.Core.Services;
+using Octopus.Conductor.WebApi.Settings;
 
 namespace Octopus.Conductor.WebApi
 {
@@ -22,6 +23,8 @@ namespace Octopus.Conductor.WebApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<WorkerSettings>(Configuration.GetSection("WorkerSettings"));
+
             services.AddScoped<IFolderListener, FolderListener>();
             services.AddDbContext(Configuration);
             services.AddRepositories();
