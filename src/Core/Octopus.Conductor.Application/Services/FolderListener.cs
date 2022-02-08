@@ -12,6 +12,7 @@ namespace Octopus.Conductor.Application.Services
     public class FolderListener : IFolderListener
     {
         private readonly IRepository _repository;
+        private ConcurrentQueue<Exception> _exceptions;
 
         public FolderListener(IRepository repository)
         {
@@ -20,10 +21,21 @@ namespace Octopus.Conductor.Application.Services
 
         public async Task MoveEntityFilesAsync(CancellationToken cancellationToken = default)
         {
-            var descriptions = await _repository
-                .GetAllAsync<ConductorEntityDescription>(cancellationToken);
+            _exceptions = new ConcurrentQueue<Exception>();
+            try
+            {
+                var descriptions = await _repository
+                    .GetAllAsync<ConductorEntityDescription>(cancellationToken);
 
-            ProcessDirectoriesInParallel(descriptions, cancellationToken);
+                ProcessDirectoriesInParallel(descriptions, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _exceptions.Enqueue(ex);
+            }
+
+            if (_exceptions.Count > 0)
+                throw new AggregateException(_exceptions);
         }
 
         private void ProcessDirectoriesInParallel(
@@ -35,35 +47,25 @@ namespace Octopus.Conductor.Application.Services
             Parallel.ForEach(descriptions,
                 new ParallelOptions { CancellationToken = cancellationToken }, desc =>
               {
-                  try
+                  var files = Directory.GetFiles(desc.InputDirectory, "*.*", SearchOption.AllDirectories);
+
+                  if (!Directory.Exists(desc.OutputDirectory))
+                      Directory.CreateDirectory(desc.OutputDirectory);
+
+                  foreach (var file in files)
                   {
-                      var files = Directory.GetFiles(desc.InputDirectory, "*.*", SearchOption.AllDirectories);
-
-                      if (!Directory.Exists(desc.OutputDirectory))
-                          Directory.CreateDirectory(desc.OutputDirectory);
-
-                      foreach (var file in files)
+                      try
                       {
-                          try
-                          {
-                              cancellationToken.ThrowIfCancellationRequested();
-                              var fileInfo = new FileInfo(file);
-                              File.Move(fileInfo.FullName, Path.Combine(desc.OutputDirectory, fileInfo.Name));
-                          }
-                          catch (Exception ex)
-                          {
-                              exceptions.Enqueue(ex);
-                          }
+                          cancellationToken.ThrowIfCancellationRequested();
+                          var fileInfo = new FileInfo(file);
+                          File.Move(fileInfo.FullName, Path.Combine(desc.OutputDirectory, fileInfo.Name));
+                      }
+                      catch (Exception ex)
+                      {
+                          _exceptions.Enqueue(ex);
                       }
                   }
-                  catch (Exception ex)
-                  {
-                      exceptions.Enqueue(ex);
-                  }
               });
-
-            if (exceptions.Count > 0)
-                throw new AggregateException(exceptions);
         }
     }
 }
