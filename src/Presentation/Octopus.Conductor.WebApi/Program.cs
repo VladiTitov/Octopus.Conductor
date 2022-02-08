@@ -17,10 +17,6 @@ namespace Octopus.Conductor.WebApi
                 .ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.UseStartup<Startup>();
-                    })
-                .ConfigureServices(services =>
-                    {
-                        services.AddHostedService<FileMovingBackgroundService>();
                     });
     }
 }

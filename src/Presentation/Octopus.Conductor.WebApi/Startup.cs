@@ -4,9 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Octopus.Conductor.Application.Interfaces;
-using Octopus.Conductor.Application.Services;
+using Octopus.Conductor.Application;
 using Octopus.Conductor.Infrastructure.RelationalDB;
+using Octopus.Conductor.Infrastructure.WorkerService;
 using Octopus.Conductor.WebApi.Settings;
 using System;
 
@@ -24,8 +24,8 @@ namespace Octopus.Conductor.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<WorkerSettings>(Configuration.GetSection("WorkerSettings"));
-
-            services.AddScoped<IFolderListener, FolderListener>();
+            services.AddApplicationServices();
+            services.AddWorkerServices();
             services.AddDbContext(Configuration);
             services.AddRepositories();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
