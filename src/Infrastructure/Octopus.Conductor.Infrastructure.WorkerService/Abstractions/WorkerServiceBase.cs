@@ -1,47 +1,45 @@
 ﻿using Microsoft.Extensions.Logging;
-using Octopus.Conductor.Infrastructure.WorkerService.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Octopus.Conductor.Infrastructure.WorkerService.Services
+namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 {
-    public abstract class WorkerServiceBase : IExtendedHostingService, IDisposable
+    public abstract class WorkerServiceBase : IExtendedHostedService, IDisposable
     {
         private Task _executingTask;
-        private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
+        private CancellationTokenSource _stoppingCts;
         private ILogger _logger;
 
-        public WorkerServiceBase(
-            ILogger<WorkerServiceBase> logger)
+        public int RepeatIntervalSeconds { get; set; } = 1000;
+
+        public WorkerServiceBase(ILogger logger)
         {
             _logger = logger;
         }
 
         public abstract Task DoWorkAsync(CancellationToken stoppingToken);
         public abstract void ExceptionHandle(Exception exception);
-
         protected virtual async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
-                _logger.LogInformation("HostedService is started");
+                _logger.LogInformation("Background service is started");
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     try
                     {
-                        _logger.LogInformation($"{DateTime.Now}");
                         await DoWorkAsync(stoppingToken).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
                         ExceptionHandle(ex);
                     }
-                    await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
+                    await Task.Delay(RepeatIntervalSeconds, stoppingToken).ConfigureAwait(false);
                 }
 
                 _logger.LogInformation(
-                    "HostedService is stoped",
+                    "Background service is stoped",
                     stoppingToken.IsCancellationRequested);
             }
             catch (OperationCanceledException ex)
@@ -53,12 +51,15 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
                 _logger.LogError(ex, "Unhandled exception. Execution Stopping");
             }
         }
+
         public virtual Task StartAsync(CancellationToken cancellationToken)
         {
-            if (_executingTask.Status == TaskStatus.Running)
-                return Task.CompletedTask;
-
-            _executingTask = ExecuteAsync(_stoppingCts.Token);
+            if (_executingTask == null ||
+                _executingTask.Status == TaskStatus.RanToCompletion)
+            {
+                _stoppingCts = new CancellationTokenSource();
+                _executingTask = DoWorkAsync(_stoppingCts.Token);
+            }
 
             if (_executingTask.IsCompleted)
             {
@@ -82,6 +83,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
             finally
             {
                 await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
+                _executingTask.Dispose();
             }
         }
 
