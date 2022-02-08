@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Octopus.Conductor.WebApi.Controllers
@@ -10,11 +12,11 @@ namespace Octopus.Conductor.WebApi.Controllers
     public class ManagementController : ControllerBase
     {
         private readonly ILogger<ManagementController> _logger;
-        private readonly IHostedService _hostedService;
+        private readonly IExtendedHostedService _hostedService;
 
         public ManagementController(
             ILogger<ManagementController> logger,
-            IHostedService hostedService)
+            IExtendedHostedService hostedService)
         {
             _logger = logger;
             _hostedService = hostedService;
@@ -24,7 +26,7 @@ namespace Octopus.Conductor.WebApi.Controllers
         [Route("Start")]
         public async Task<IActionResult> StartHostedService()
         {
-            await _hostedService.StartAsync(new System.Threading.CancellationToken());
+            await _hostedService.StartAsync(new CancellationToken());
             return Ok();
         }
 
@@ -32,7 +34,7 @@ namespace Octopus.Conductor.WebApi.Controllers
         [Route("Stop")]
         public async Task<IActionResult> StopHostedService()
         {
-            await _hostedService.StopAsync(new System.Threading.CancellationToken());
+            await _hostedService.StopAsync(new CancellationToken());
             return Ok();
         }
     }
