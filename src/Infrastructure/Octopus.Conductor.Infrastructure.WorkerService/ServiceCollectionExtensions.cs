@@ -10,7 +10,6 @@ namespace Octopus.Conductor.Infrastructure.WorkerService
     {
         public static void AddWorkerServices(this IServiceCollection services)
         {
-            //services.AddSingleton<IFolderListener, FolderListener>();
             services.AddSingleton<IExtendedHostedService, FileMovingWorkerService>();
         }
     }
