@@ -7,7 +7,7 @@ using Microsoft.OpenApi.Models;
 using Octopus.Conductor.Application;
 using Octopus.Conductor.Infrastructure.RelationalDB;
 using Octopus.Conductor.Infrastructure.WorkerService;
-using Octopus.Conductor.WebApi.Settings;
+using Octopus.Conductor.Infrastructure.WorkerService.Config;
 using System;
 
 namespace Octopus.Conductor.WebApi
