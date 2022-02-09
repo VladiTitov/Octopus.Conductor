@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Octopus.Conductor.Application.Interfaces;
 using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
+using Octopus.Conductor.Infrastructure.WorkerService.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,8 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
 
         public FileMovingWorkerService(
             ILogger<FileMovingWorkerService> logger,
-            IServiceProvider serviceProvider) : base(logger)
+            IServiceProvider serviceProvider,
+            IOptions<WorkerSettings> settings) : base(logger,settings.Value)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -34,6 +37,9 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
 
         public override void ExceptionHandle(Exception exception)
         {
+            if (exception == null)
+                return;
+
             switch (exception)
             {
                 case AggregateException ae:

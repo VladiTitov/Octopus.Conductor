@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Octopus.Conductor.Infrastructure.WorkerService.Config;
+using Octopus.Conductor.Infrastructure.WorkerService.Enums;
+using Octopus.Conductor.Infrastructure.WorkerService.Exceptions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,12 +13,17 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
         private Task _executingTask;
         private CancellationTokenSource _stoppingCts;
         private ILogger _logger;
+        private readonly WorkerSettings _settings;
+        private WorkerServiseStatus _status;
 
-        public int RepeatIntervalSeconds { get; set; } = 1000;
-
-        public WorkerServiceBase(ILogger logger)
+        public WorkerServiceBase(ILogger logger, WorkerSettings settings)
         {
+            if (settings.RepeatIntervalSeconds <= 0)
+                throw new IncorrectRepeatInterval("Incorrect repeat interval in seconds for worker service");
+            
             _logger = logger;
+            _settings = settings;
+            _status = WorkerServiseStatus.Created;
         }
 
         public abstract Task DoWorkAsync(CancellationToken stoppingToken);
@@ -25,6 +33,8 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             try
             {
                 _logger.LogInformation("Background service is started");
+                _status = WorkerServiseStatus.Running;
+
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     try
@@ -35,30 +45,32 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
                     {
                         ExceptionHandle(ex);
                     }
-                    await Task.Delay(RepeatIntervalSeconds, stoppingToken).ConfigureAwait(false);
+                    await Task.Delay(1000 * _settings.RepeatIntervalSeconds, stoppingToken).ConfigureAwait(false);
                 }
-
-                _logger.LogInformation(
-                    "Background service is stoped",
-                    stoppingToken.IsCancellationRequested);
             }
             catch (OperationCanceledException ex)
             {
-                _logger.LogWarning(ex, "Execution Canceled");
+                _logger.LogWarning(ex,
+                    "Execution Canceled",
+                    stoppingToken.IsCancellationRequested);
+                _status = WorkerServiseStatus.Stoped;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception. Execution Stopping");
+                _status = WorkerServiseStatus.Faulted;
             }
+
+            _status = WorkerServiseStatus.Completed;
         }
 
         public virtual Task StartAsync(CancellationToken cancellationToken)
         {
             if (_executingTask == null ||
-                _executingTask.Status == TaskStatus.RanToCompletion)
+                _status != WorkerServiseStatus.Running)
             {
                 _stoppingCts = new CancellationTokenSource();
-                _executingTask = DoWorkAsync(_stoppingCts.Token);
+                _executingTask = ExecuteAsync(_stoppingCts.Token);
             }
 
             if (_executingTask.IsCompleted)
@@ -87,9 +99,9 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             }
         }
 
-        public TaskStatus GetWorkerStatus()
+        public WorkerServiseStatus GetWorkerStatus()
         {
-            return _executingTask.Status;
+            return _status;
         }
 
         public void Dispose()
