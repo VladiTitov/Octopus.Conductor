@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Hosting;
-using System.Threading.Tasks;
+using Octopus.Conductor.Infrastructure.WorkerService.Enums;
 
 namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 {
     public interface IExtendedHostedService : IHostedService
     {
-        public TaskStatus GetWorkerStatus();
+        public WorkerServiseStatus GetWorkerStatus();
     }
 }
