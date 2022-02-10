@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,12 +23,17 @@ namespace Octopus.Conductor.Application.Services
         public async Task MoveEntityFilesAsync(CancellationToken cancellationToken = default)
         {
             _exceptions = new ConcurrentQueue<Exception>();
+
             try
             {
                 var descriptions = await _repository
                     .GetAllAsync<ConductorEntityDescription>(cancellationToken);
 
                 ProcessDirectoriesInParallel(descriptions, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -42,30 +48,37 @@ namespace Octopus.Conductor.Application.Services
             IEnumerable<ConductorEntityDescription> descriptions,
             CancellationToken cancellationToken)
         {
-            var exceptions = new ConcurrentQueue<Exception>();
-
             Parallel.ForEach(descriptions,
                 new ParallelOptions { CancellationToken = cancellationToken }, desc =>
               {
-                  var files = Directory.GetFiles(desc.InputDirectory, "*.*", SearchOption.AllDirectories);
+                  var inputDirInfo = new DirectoryInfo(desc.InputDirectory);
 
                   if (!Directory.Exists(desc.OutputDirectory))
                       Directory.CreateDirectory(desc.OutputDirectory);
 
-                  foreach (var file in files)
-                  {
-                      try
-                      {
-                          cancellationToken.ThrowIfCancellationRequested();
-                          var fileInfo = new FileInfo(file);
-                          File.Move(fileInfo.FullName, Path.Combine(desc.OutputDirectory, fileInfo.Name));
-                      }
-                      catch (Exception ex)
-                      {
-                          _exceptions.Enqueue(ex);
-                      }
-                  }
+                  inputDirInfo.EnumerateFiles("*", SearchOption.AllDirectories)
+                  .ToList()
+                  .ForEach(info => {
+                      cancellationToken.ThrowIfCancellationRequested();
+                      MoveFile(info,desc.OutputDirectory);
+                  });
               });
+        }
+
+        private void MoveFile(FileInfo fileInfo,string destDir)
+        {
+            try
+            {
+                File.Move(fileInfo.FullName, Path.Combine(destDir, fileInfo.Name));
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _exceptions.Enqueue(ex);
+            }
         }
     }
 }
