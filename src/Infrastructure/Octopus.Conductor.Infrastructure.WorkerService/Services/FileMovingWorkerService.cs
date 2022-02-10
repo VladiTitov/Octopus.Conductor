@@ -37,9 +37,6 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
 
         public override void ExceptionHandle(Exception exception)
         {
-            if (exception == null)
-                return;
-
             switch (exception)
             {
                 case AggregateException ae:
@@ -56,6 +53,9 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
                         "Unhandled exception",
                         GetType().Name);
                     break;
+
+                default:
+                    return;
             }
         }
     }
