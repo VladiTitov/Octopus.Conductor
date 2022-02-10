@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Octopus.Conductor.Application.Constants;
 using Octopus.Conductor.Application.Enums;
 using Octopus.Conductor.Application.Exceptions;
 using Octopus.Conductor.Infrastructure.WorkerService.Config;
@@ -19,7 +20,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
         public WorkerServiceBase(ILogger logger, WorkerSettings settings)
         {
             if (settings.RepeatIntervalSeconds <= 0)
-                throw new IncorrectRepeatIntervalException("Incorrect repeat interval in seconds for worker service");
+                throw new IncorrectRepeatIntervalException(ErrorMessages.IncorrectRepeatInterval);
 
             _logger = logger;
             _settings = settings;
@@ -94,8 +95,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             }
             finally
             {
-                await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
-                _executingTask.Dispose();
+                await _executingTask;
             }
         }
 
