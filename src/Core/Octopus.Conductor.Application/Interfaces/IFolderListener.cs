@@ -5,6 +5,6 @@ namespace Octopus.Conductor.Application.Interfaces
 {
     public interface IFolderListener
     {
-        public Task MoveEntityFilesAsync(CancellationToken cancellationToken = default);
+        Task MoveEntityFilesAsync(CancellationToken cancellationToken = default);
     }
 }
