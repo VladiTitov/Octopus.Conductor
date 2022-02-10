@@ -71,8 +71,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 
         public virtual Task StartAsync(CancellationToken cancellationToken)
         {
-            if (_executingTask == null ||
-                _status != WorkerServiseStatus.Running)
+            if (!IsWorkerRunning())
             {
                 _stoppingCts = new CancellationTokenSource();
                 _executingTask = ExecuteAsync(_stoppingCts.Token);
@@ -85,6 +84,8 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 
             return Task.CompletedTask;
         }
+
+        private bool IsWorkerRunning() => _status == WorkerServiseStatus.Running;
 
         public virtual async Task StopAsync(CancellationToken cancellationToken)
         {
