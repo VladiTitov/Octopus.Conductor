@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Octopus.Conductor.Application.Enums;
+using Octopus.Conductor.Application.Exceptions;
 using Octopus.Conductor.Infrastructure.WorkerService.Config;
-using Octopus.Conductor.Infrastructure.WorkerService.Enums;
-using Octopus.Conductor.Infrastructure.WorkerService.Exceptions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +20,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
         {
             if (settings.RepeatIntervalSeconds <= 0)
                 throw new IncorrectRepeatIntervalException("Incorrect repeat interval in seconds for worker service");
-            
+
             _logger = logger;
             _settings = settings;
             _status = WorkerServiseStatus.Created;

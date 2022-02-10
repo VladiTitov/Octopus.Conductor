@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Octopus.Conductor.Infrastructure.WorkerService.Enums;
+using Octopus.Conductor.Application.Enums;
 
 namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 {

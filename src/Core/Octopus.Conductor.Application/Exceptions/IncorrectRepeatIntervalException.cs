@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Octopus.Conductor.Infrastructure.WorkerService.Exceptions
+namespace Octopus.Conductor.Application.Exceptions
 {
     public class IncorrectRepeatIntervalException : Exception
     {
