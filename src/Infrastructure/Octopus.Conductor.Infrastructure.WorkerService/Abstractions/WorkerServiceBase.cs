@@ -42,6 +42,10 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
                     {
                         await DoWorkAsync(stoppingToken).ConfigureAwait(false);
                     }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
                     catch (Exception ex)
                     {
                         ExceptionHandle(ex);
