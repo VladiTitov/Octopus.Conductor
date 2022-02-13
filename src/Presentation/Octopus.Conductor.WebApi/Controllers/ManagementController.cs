@@ -12,21 +12,21 @@ namespace Octopus.Conductor.WebApi.Controllers
     public class ManagementController : ControllerBase
     {
         private readonly ILogger<ManagementController> _logger;
-        private readonly IExtendedHostedService _hostedService;
+        private readonly WorkerServiceBase _workerService;
 
         public ManagementController(
             ILogger<ManagementController> logger,
-            IExtendedHostedService hostedService)
+            WorkerServiceBase workerService)
         {
             _logger = logger;
-            _hostedService = hostedService;
+            _workerService = workerService;
         }
 
         [HttpGet]
         [Route("Start")]
         public async Task<IActionResult> StartHostedService()
         {
-            await _hostedService.StartAsync(new CancellationToken());
+            await _workerService.StartAsync(new CancellationToken());
             return Ok();
         }
 
@@ -34,7 +34,7 @@ namespace Octopus.Conductor.WebApi.Controllers
         [Route("Stop")]
         public async Task<IActionResult> StopHostedService()
         {
-            await _hostedService.StopAsync(new CancellationToken());
+            await _workerService.StopAsync(new CancellationToken());
             return Ok();
         }
     }
