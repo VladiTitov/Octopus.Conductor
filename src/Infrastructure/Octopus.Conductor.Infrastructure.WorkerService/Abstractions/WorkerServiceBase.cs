@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Octopus.Conductor.Application.Constants;
 using Octopus.Conductor.Application.Enums;
 using Octopus.Conductor.Application.Exceptions;
@@ -9,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 {
-    public abstract class WorkerServiceBase : IExtendedHostedService, IDisposable
+    public abstract class WorkerServiceBase : IHostedService, IDisposable
     {
         private Task _executingTask;
         private CancellationTokenSource _stoppingCts;
         private ILogger _logger;
         private readonly WorkerSettings _settings;
-        private WorkerServiseStatus _status;
+        public WorkerServiseStatus Status { get; private set; }
 
         public WorkerServiceBase(ILogger logger, WorkerSettings settings)
         {
@@ -24,7 +25,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 
             _logger = logger;
             _settings = settings;
-            _status = WorkerServiseStatus.Created;
+            Status = WorkerServiseStatus.Created;
         }
 
         public abstract Task DoWorkAsync(CancellationToken stoppingToken);
@@ -34,7 +35,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             try
             {
                 _logger.LogInformation("Background service is started");
-                _status = WorkerServiseStatus.Running;
+                Status = WorkerServiseStatus.Running;
 
                 while (!stoppingToken.IsCancellationRequested)
                 {
@@ -58,15 +59,15 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
                 _logger.LogWarning(ex,
                     "Execution Canceled",
                     stoppingToken.IsCancellationRequested);
-                _status = WorkerServiseStatus.Stoped;
+                Status = WorkerServiseStatus.Stoped;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception. Execution Stopping");
-                _status = WorkerServiseStatus.Faulted;
+                Status = WorkerServiseStatus.Faulted;
             }
 
-            _status = WorkerServiseStatus.Completed;
+            Status = WorkerServiseStatus.Completed;
         }
 
         public virtual Task StartAsync(CancellationToken cancellationToken)
@@ -85,7 +86,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             return Task.CompletedTask;
         }
 
-        private bool IsWorkerRunning() => _status == WorkerServiseStatus.Running;
+        private bool IsWorkerRunning() => Status == WorkerServiseStatus.Running;
 
         public virtual async Task StopAsync(CancellationToken cancellationToken)
         {
@@ -102,11 +103,6 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             {
                 await _executingTask;
             }
-        }
-
-        public WorkerServiseStatus GetWorkerStatus()
-        {
-            return _status;
         }
 
         public void Dispose()
