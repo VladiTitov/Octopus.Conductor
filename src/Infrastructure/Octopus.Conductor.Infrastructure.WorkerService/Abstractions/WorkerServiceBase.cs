@@ -70,7 +70,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             Status = WorkerServiseStatus.Completed;
         }
 
-        public virtual Task StartAsync(CancellationToken cancellationToken)
+        public virtual async Task StartAsync(CancellationToken cancellationToken)
         {
             if (!IsWorkerRunning())
             {
@@ -80,10 +80,10 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 
             if (_executingTask.IsCompleted)
             {
-                return _executingTask;
+                await _executingTask;
             }
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
         private bool IsWorkerRunning() => Status == WorkerServiseStatus.Running;
@@ -103,11 +103,6 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
             {
                 await _executingTask;
             }
-        }
-
-        public WorkerServiseStatus GetWorkerStatus()
-        {
-            return Status;
         }
 
         public void Dispose()
