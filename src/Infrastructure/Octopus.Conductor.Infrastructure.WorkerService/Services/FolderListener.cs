@@ -1,5 +1,6 @@
 ﻿using Octopus.Conductor.Application.Interfaces;
 using Octopus.Conductor.Domain.Entities;
+using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Octopus.Conductor.Application.Services
+namespace Octopus.Conductor.Infrastructure.WorkerService.Services
 {
     public class FolderListener : IFolderListener
     {

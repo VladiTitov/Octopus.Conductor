@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Octopus.Conductor.Application.Interfaces
+namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 {
     public interface IFolderListener
     {
