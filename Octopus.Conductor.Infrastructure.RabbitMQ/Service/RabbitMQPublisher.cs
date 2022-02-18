@@ -15,16 +15,16 @@ using System.Threading.Tasks;
 
 namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
 {
-    public class RabbitMQMessageSender : IMessageSender
+    public class RabbitMQPublisher : IMessagePublisher
     {
-        private readonly IRabbitMQPersistentConnection _persistentConnection;
-        private readonly ILogger<RabbitMQMessageSender> _logger;
+        private readonly IPersistentConnection _persistentConnection;
+        private readonly ILogger<RabbitMQPublisher> _logger;
         private readonly int _retryCount;
         private IModel _channel;
         private Policy _policy;
 
-        public RabbitMQMessageSender(IRabbitMQPersistentConnection persistentConnection,
-            ILogger<RabbitMQMessageSender> logger,
+        public RabbitMQPublisher(IPersistentConnection persistentConnection,
+            ILogger<RabbitMQPublisher> logger,
             int retryCount)
         {
             _persistentConnection = persistentConnection;
@@ -41,54 +41,29 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
                         _logger.LogWarning(ex, "Could not publish message after {Timeout}s ({ExceptionMessage})", $"{time.TotalSeconds:n1}", ex.Message);
                     });
 
-        public Task SendMessage(object message)
+
+        public void Publish<T>(T message, string channelName, string exchangeName, string routingKey)
         {
             if (!_persistentConnection.IsConnected)
             {
                 if (_persistentConnection.TryConnect())
-                    _channel = _persistentConnection.CreateModel();
+                    _channel = _persistentConnection.GetModel(channelName);
             }
-            
+
             var body = JsonSerializer.SerializeToUtf8Bytes(message, message.GetType());
 
             _policy.Execute(() =>
             {
                 var properties = _channel.CreateBasicProperties();
-                IModel
                 properties.DeliveryMode = 2;
 
                 _channel.BasicPublish(
-                    exchange: "",
-                    routingKey: "",
+                    exchange: exchangeName,
+                    routingKey: routingKey,
                     mandatory: true,
                     basicProperties: properties,
                     body: body);
             });
-
-            return Task.CompletedTask;
-        }
-
-        private IModel CreatePublisherChannel()
-        {
-            if (!_persistentConnection.IsConnected)
-            {
-                _persistentConnection.TryConnect();
-            }
-
-            _logger.LogTrace("Creating RabbitMQ consumer channel");
-
-            var channel = _persistentConnection.CreateModel();
-
-            channel.ExchangeDeclare(exchange: "test-exchange",
-                                    type: "direct");
-
-            channel.QueueDeclare(queue: "test-queue",
-                                    durable: true,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
-
-            return channel;
         }
     }
 }

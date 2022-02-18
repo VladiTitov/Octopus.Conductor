@@ -3,10 +3,10 @@ using System;
 
 namespace Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces
 {
-    public interface IRabbitMQPersistentConnection : IDisposable
+    public interface IPersistentConnection : IDisposable
     {
         bool IsConnected { get; }
         bool TryConnect();
-        IModel CreateModel();
+        IModel GetModel(string channelName);
     }
 }
