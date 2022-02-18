@@ -9,6 +9,6 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Config
     public class RabbitMQConfiguration
     {
         public Connection Connection { get; set; }
-        public IEnumerable<Channel> Channels { get; set; }
+        public IDictionary<string, Channel> Channels { get; set; }
     }
 }

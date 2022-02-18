@@ -12,6 +12,6 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Config
         public bool Durable { get; set; }
         public bool Exclusive { get; set; }
         public bool AutoDelete { get; set; }
-        IDictionary<string, object> Arguments { get; set; }
+        public IDictionary<string, object> Arguments { get; set; }
     }
 }
