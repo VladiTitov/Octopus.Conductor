@@ -24,7 +24,6 @@ namespace Octopus.Conductor.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<WorkerSettings>(Configuration.GetSection("WorkerSettings"));
-            services.AddApplicationServices();
             services.AddWorkerServices();
             services.AddDbContext(Configuration);
             services.AddRepositories();
