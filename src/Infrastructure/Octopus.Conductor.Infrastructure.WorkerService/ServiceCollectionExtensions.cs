@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Octopus.Conductor.Application.Interfaces;
-using Octopus.Conductor.Application.Services;
 using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
 using Octopus.Conductor.Infrastructure.WorkerService.Services;
 

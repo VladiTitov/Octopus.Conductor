@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octopus.Conductor.Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octopus.Conductor.Infrastructure.WorkerService", "src\Infrastructure\Octopus.Conductor.Infrastructure.WorkerService\Octopus.Conductor.Infrastructure.WorkerService.csproj", "{11924E27-D08A-4503-A05F-2B929383C818}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Infrastructure.RabbitMQ", "Octopus.Conductor.Infrastructure.RabbitMQ\Octopus.Conductor.Infrastructure.RabbitMQ.csproj", "{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Infrastructure.RabbitMQ", "src\Infrastructure\Octopus.Conductor.Infrastructure.RabbitMQ\Octopus.Conductor.Infrastructure.RabbitMQ.csproj", "{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

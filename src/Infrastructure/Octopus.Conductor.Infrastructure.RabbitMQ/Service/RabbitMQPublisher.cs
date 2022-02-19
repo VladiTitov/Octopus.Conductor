@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Octopus.Conductor.Application.Interfaces;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
 using Polly;
 using Polly.Retry;
