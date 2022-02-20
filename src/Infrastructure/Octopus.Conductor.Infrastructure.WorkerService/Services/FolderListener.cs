@@ -1,5 +1,7 @@
 ﻿using Octopus.Conductor.Application.Interfaces;
 using Octopus.Conductor.Domain.Entities;
+using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
+using Octopus.Conductor.Infrastructure.RabbitMQ.Service;
 using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
 using System;
 using System.Collections.Concurrent;
@@ -14,11 +16,14 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
     public class FolderListener : IFolderListener
     {
         private readonly IRepository _repository;
+        private readonly IMessagePublisher _publisher;
         private ConcurrentQueue<Exception> _exceptions;
 
-        public FolderListener(IRepository repository)
+        public FolderListener(IRepository repository,
+            IMessagePublisher publisher)
         {
             _repository = repository;
+            _publisher = publisher;
         }
 
         public async Task MoveEntityFilesAsync(CancellationToken cancellationToken = default)
@@ -59,18 +64,26 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
 
                   inputDirInfo.EnumerateFiles("*", SearchOption.AllDirectories)
                   .ToList()
-                  .ForEach(info => {
+                  .ForEach(info =>
+                  {
                       cancellationToken.ThrowIfCancellationRequested();
-                      MoveFile(info,desc.OutputDirectory);
+                      MoveFile(info, desc);
                   });
               });
         }
 
-        private void MoveFile(FileInfo fileInfo,string destDir)
+        private void MoveFile(FileInfo fileInfo, ConductorEntityDescription desc)
         {
             try
             {
-                File.Move(fileInfo.FullName, Path.Combine(destDir, fileInfo.Name));
+                var destFilePath = Path.Combine(desc.OutputDirectory, fileInfo.Name);
+                File.Move(fileInfo.FullName, destFilePath);
+                _publisher.Publish(
+                new
+                {
+                    Type = desc.EntityType,
+                    Path = destFilePath
+                }, "demo-channel", "demo-exchange", "demo-key");
             }
             catch (OperationCanceledException)
             {
