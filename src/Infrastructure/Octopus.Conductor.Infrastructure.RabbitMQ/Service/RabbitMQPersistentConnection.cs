@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Octopus.Conductor.Application.Constants;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Config;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
 using Polly;
@@ -18,22 +20,28 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
         private readonly IConnectionFactory _connectionFactory;
         private readonly RabbitMQConfiguration _configuration;
         private readonly ILogger<RabbitMQPersistentConnection> _logger;
-        private readonly int _retryCount;
         IDictionary<string, IModel> _channels;
         IConnection _connection;
         bool _disposed;
 
         object _lock = new object();
 
-        public RabbitMQPersistentConnection(IConnectionFactory connectionFactory,
+        public RabbitMQPersistentConnection(
             ILogger<RabbitMQPersistentConnection> logger,
-            RabbitMQConfiguration configuration,
-            int retryCount = 5)
+            IOptions<RabbitMQConfiguration> configuration)
         {
-            _connectionFactory = connectionFactory;
-            _configuration = configuration;
+            _configuration = configuration.Value;
+
+            _connectionFactory = new ConnectionFactory
+            {
+                HostName = _configuration.Connection.Hostname,
+                Port = _configuration.Connection.Port,
+                UserName = _configuration.Connection.UserName,
+                Password = _configuration.Connection.Password,
+                VirtualHost = _configuration.Connection.VirtualHost,
+            };
+
             _logger = logger;
-            _retryCount = retryCount;
             _channels = new Dictionary<string, IModel>();
         }
 
@@ -128,12 +136,13 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
             {
                 var policy = RetryPolicy.Handle<SocketException>()
                     .Or<BrokerUnreachableException>()
-                    .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-                    {
-                        _logger.LogWarning(ex,
-                            "RabbitMQ Client could not connect after {TimeOut}s ({ExceptionMessage})",
-                            $"{time.TotalSeconds:n1}", ex.Message);
-                    }
+                    .WaitAndRetry(RabbitMQConstants.RetryCount,
+                        retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                        {
+                            _logger.LogWarning(ex,
+                                "RabbitMQ Client could not connect after {TimeOut}s ({ExceptionMessage})",
+                                $"{time.TotalSeconds:n1}", ex.Message);
+                        }
                 );
 
                 policy.Execute(() =>
