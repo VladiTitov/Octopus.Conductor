@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Octopus.Conductor.Application\Octopus.Conductor.Application.csproj" />
+    <ProjectReference Include="..\Octopus.Conductor.Infrastructure.RabbitMQ\Octopus.Conductor.Infrastructure.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>
