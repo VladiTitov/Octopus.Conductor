@@ -13,12 +13,13 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
 {
     public class RabbitMQPublisher : IMessagePublisher
     {
-        private readonly IPersistentConnection _persistentConnection;
+        private readonly Interfaces.IConnection _persistentConnection;
         private readonly ILogger<RabbitMQPublisher> _logger;
-        private IModel _channel;
-        private Policy _policy;
+        IModel _channel;
+        Policy _policy;
+        object _lock = new object();
 
-        public RabbitMQPublisher(IPersistentConnection persistentConnection,
+        public RabbitMQPublisher(Interfaces.IConnection persistentConnection,
             ILogger<RabbitMQPublisher> logger)
         {
             _persistentConnection = persistentConnection;
@@ -27,7 +28,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
         }
 
         private Policy CreatePolicy() =>
-            RetryPolicy.Handle<BrokerUnreachableException>()
+            Policy.Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
                 .WaitAndRetry(RabbitMQConstants.RetryCount,
                     retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
@@ -39,11 +40,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
 
         public void Publish<T>(T message, string channelName, string exchangeName, string routingKey)
         {
-            if (!_persistentConnection.IsConnected)
-            {
-                if (_persistentConnection.TryConnect())
-                    _channel = _persistentConnection.GetModel(channelName);
-            }
+            TryConnectToChannel(channelName);
 
             var body = JsonSerializer.SerializeToUtf8Bytes(message, message.GetType());
 
@@ -59,6 +56,13 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
                     basicProperties: properties,
                     body: body);
             });
+        }
+
+        private void TryConnectToChannel(string channelName)
+        {
+            lock (_lock)
+                if (_persistentConnection.IsConnected || _persistentConnection.TryConnect())
+                    _channel = _persistentConnection.GetModel(channelName);
         }
     }
 }
