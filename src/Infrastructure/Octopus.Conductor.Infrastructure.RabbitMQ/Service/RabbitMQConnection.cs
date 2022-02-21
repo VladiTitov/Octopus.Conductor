@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Octopus.Conductor.Application.Constants;
+using Octopus.Conductor.Application.Exceptions;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Config;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
 using Polly;
@@ -15,19 +16,18 @@ using System.Net.Sockets;
 
 namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
 {
-    public class RabbitMQPersistentConnection : IPersistentConnection
+    public class RabbitMQConnection : Interfaces.IConnection
     {
         private readonly IConnectionFactory _connectionFactory;
         private readonly RabbitMQConfiguration _configuration;
-        private readonly ILogger<RabbitMQPersistentConnection> _logger;
+        private readonly ILogger<RabbitMQConnection> _logger;
         IDictionary<string, IModel> _channels;
-        IConnection _connection;
+        Policy _policy;
+        global::RabbitMQ.Client.IConnection _connection;
         bool _disposed;
 
-        object _lock = new object();
-
-        public RabbitMQPersistentConnection(
-            ILogger<RabbitMQPersistentConnection> logger,
+        public RabbitMQConnection(
+            ILogger<RabbitMQConnection> logger,
             IOptions<RabbitMQConfiguration> configuration)
         {
             _configuration = configuration.Value;
@@ -42,8 +42,20 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
             };
 
             _logger = logger;
+            _policy = CreatePolicy();
             _channels = new Dictionary<string, IModel>();
         }
+
+        private Policy CreatePolicy() =>
+            Policy.Handle<BrokerUnreachableException>()
+                .Or<SocketException>()
+                .WaitAndRetry(RabbitMQConstants.RetryCount,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                    {
+                        _logger.LogWarning(ex,
+                                "RabbitMQ Client could not connect after {TimeOut}s ({ExceptionMessage})",
+                                $"{time.TotalSeconds:n1}", ex.Message);
+                    });
 
         public bool IsConnected =>
             _connection != null && _connection.IsOpen && !_disposed;
@@ -52,12 +64,14 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
         {
             if (!IsConnected)
             {
-                throw new InvalidOperationException("No RabbitMQ connections are available to perform this action");
+                throw new InvalidOperationException(
+                    "No RabbitMQ connections are available to perform this action");
             }
 
             if (!_configuration.Channels.ContainsKey(channelName))
             {
-                throw new Exception("Test");
+                throw new IncorrectRabbitMQConfigurationException(
+                    $"Configuration file doesn't contain channel with name: {channelName}");
             }
 
             if (_channels.ContainsKey(channelName))
@@ -126,49 +140,39 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
             {
                 _logger.LogCritical(ex.ToString());
             }
+            finally
+            {
+                _logger.LogWarning("RabbitMQ connection is closed");
+            }
         }
 
         public bool TryConnect()
         {
             _logger.LogInformation("RabbitMQ Client is trying to connect");
 
-            lock (_lock)
+            _policy.Execute(() =>
             {
-                var policy = RetryPolicy.Handle<SocketException>()
-                    .Or<BrokerUnreachableException>()
-                    .WaitAndRetry(RabbitMQConstants.RetryCount,
-                        retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-                        {
-                            _logger.LogWarning(ex,
-                                "RabbitMQ Client could not connect after {TimeOut}s ({ExceptionMessage})",
-                                $"{time.TotalSeconds:n1}", ex.Message);
-                        }
-                );
+                _connection = _connectionFactory
+                        .CreateConnection();
+            });
 
-                policy.Execute(() =>
-                {
-                    _connection = _connectionFactory
-                            .CreateConnection();
-                });
+            if (IsConnected)
+            {
+                _connection.ConnectionShutdown += OnConnectionShutdown;
+                _connection.CallbackException += OnCallbackException;
+                _connection.ConnectionBlocked += OnConnectionBlocked;
 
-                if (IsConnected)
-                {
-                    _connection.ConnectionShutdown += OnConnectionShutdown;
-                    _connection.CallbackException += OnCallbackException;
-                    _connection.ConnectionBlocked += OnConnectionBlocked;
+                _logger.LogInformation(
+                    "RabbitMQ Client acquired a persistent connection to '{HostName}' and is subscribed to failure events"
+                    , _connection.Endpoint.HostName);
 
-                    _logger.LogInformation(
-                        "RabbitMQ Client acquired a persistent connection to '{HostName}' and is subscribed to failure events"
-                        , _connection.Endpoint.HostName);
+                return true;
+            }
+            else
+            {
+                _logger.LogCritical("FATAL ERROR: RabbitMQ connections could not be created and opened");
 
-                    return true;
-                }
-                else
-                {
-                    _logger.LogCritical("FATAL ERROR: RabbitMQ connections could not be created and opened");
-
-                    return false;
-                }
+                return false;
             }
         }
 
