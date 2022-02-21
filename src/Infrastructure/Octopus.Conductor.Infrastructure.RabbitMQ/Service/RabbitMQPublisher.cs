@@ -2,7 +2,6 @@
 using Octopus.Conductor.Application.Constants;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
 using Polly;
-using Polly.Retry;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using System;
@@ -13,16 +12,16 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
 {
     public class RabbitMQPublisher : IMessagePublisher
     {
-        private readonly Interfaces.IConnection _persistentConnection;
+        private readonly IPersistanceConnection _connection;
         private readonly ILogger<RabbitMQPublisher> _logger;
         IModel _channel;
         Policy _policy;
         object _lock = new object();
 
-        public RabbitMQPublisher(Interfaces.IConnection persistentConnection,
+        public RabbitMQPublisher(IPersistanceConnection connection,
             ILogger<RabbitMQPublisher> logger)
         {
-            _persistentConnection = persistentConnection;
+            _connection = connection;
             _logger = logger;
             _policy = CreatePolicy();
         }
@@ -61,8 +60,8 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
         private void TryConnectToChannel(string channelName)
         {
             lock (_lock)
-                if (_persistentConnection.IsConnected || _persistentConnection.TryConnect())
-                    _channel = _persistentConnection.GetModel(channelName);
+                if (_connection.IsConnected || _connection.TryConnect())
+                    _channel = _connection.GetModel(channelName);
         }
     }
 }

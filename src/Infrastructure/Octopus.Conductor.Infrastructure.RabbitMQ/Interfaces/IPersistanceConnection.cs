@@ -3,7 +3,7 @@ using System;
 
 namespace Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces
 {
-    public interface IConnection : IDisposable
+    public interface IPersistanceConnection : IDisposable
     {
         bool IsConnected { get; }
         bool TryConnect();

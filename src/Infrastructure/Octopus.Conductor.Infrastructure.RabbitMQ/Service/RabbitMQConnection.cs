@@ -5,7 +5,6 @@ using Octopus.Conductor.Application.Exceptions;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Config;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
 using Polly;
-using Polly.Retry;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -16,14 +15,14 @@ using System.Net.Sockets;
 
 namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
 {
-    public class RabbitMQConnection : Interfaces.IConnection
+    public class RabbitMQConnection : IPersistanceConnection
     {
         private readonly IConnectionFactory _connectionFactory;
         private readonly RabbitMQConfiguration _configuration;
         private readonly ILogger<RabbitMQConnection> _logger;
         IDictionary<string, IModel> _channels;
         Policy _policy;
-        global::RabbitMQ.Client.IConnection _connection;
+        IConnection _connection;
         bool _disposed;
 
         public RabbitMQConnection(
