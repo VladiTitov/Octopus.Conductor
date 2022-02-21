@@ -8,12 +8,12 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ
     {
         public static void AddRabbitMQConnection(this IServiceCollection services)
         {
-            services.AddSingleton<IPersistentConnection, RabbitMQPersistentConnection>();
+            services.AddScoped<IConnection, RabbitMQConnection>();
         }
 
         public static void AddRabbitMQPublisher(this IServiceCollection services)
         {
-            services.AddSingleton<IMessagePublisher, RabbitMQPublisher>();
+            services.AddScoped<IMessagePublisher, RabbitMQPublisher>();
         }
     }
 }

@@ -16,23 +16,19 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
     public class FileMovingWorkerService : WorkerServiceBase
     {
         private readonly ILogger _logger;
-        private readonly IServiceProvider _serviceProvider;
 
         public FileMovingWorkerService(
             ILogger<FileMovingWorkerService> logger,
             IServiceProvider serviceProvider,
-            IOptions<WorkerSettings> settings) : base(logger,settings.Value)
+            IOptions<WorkerSettings> settings) : base(logger, settings.Value, serviceProvider)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
         }
-        public override async Task DoWorkAsync(CancellationToken stoppingToken)
+        public override async Task DoWorkAsync(IServiceScope scope, CancellationToken stoppingToken)
         {
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var folderListener = scope.ServiceProvider.GetRequiredService<IFolderListener>();
-                await folderListener.MoveEntityFilesAsync(stoppingToken);
-            }
+            var folderListener = scope.ServiceProvider.GetRequiredService<IFolderListener>();
+            await folderListener.MoveEntityFilesAsync(stoppingToken);
+
         }
 
         public override void ExceptionHandle(Exception exception)

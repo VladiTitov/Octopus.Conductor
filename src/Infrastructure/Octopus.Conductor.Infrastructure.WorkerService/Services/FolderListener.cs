@@ -1,4 +1,5 @@
-﻿using Octopus.Conductor.Application.Interfaces;
+﻿using Octopus.Conductor.Application.Constants;
+using Octopus.Conductor.Application.Interfaces;
 using Octopus.Conductor.Domain.Entities;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Service;
@@ -77,17 +78,19 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
             try
             {
                 var destFilePath = Path.Combine(desc.OutputDirectory, fileInfo.Name);
-                File.Move(fileInfo.FullName, destFilePath);
+                File.Copy(fileInfo.FullName, destFilePath, true);
+
                 _publisher.Publish(
-                new
+                message: new
                 {
                     Type = desc.EntityType,
                     Path = destFilePath
-                }, "demo-channel", "demo-exchange", "demo-key");
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                },
+                channelName: RabbitMQConstants.FolderListnerChannelName,
+                exchangeName: RabbitMQConstants.FolderListnerExchangeName,
+                routingKey: RabbitMQConstants.FolderListnerRoutingKey);
+                
+                File.Delete(fileInfo.FullName);
             }
             catch (Exception ex)
             {
