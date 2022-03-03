@@ -14,9 +14,9 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
     {
         private readonly IPersistanceConnection _connection;
         private readonly ILogger<RabbitMQPublisher> _logger;
-        IModel _channel;
-        Policy _policy;
-        object _lock = new object();
+        private IModel _channel;
+        private Policy _policy;
+        private object _lock = new object();
 
         public RabbitMQPublisher(IPersistanceConnection connection,
             ILogger<RabbitMQPublisher> logger)
@@ -46,7 +46,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
             _policy.Execute(() =>
             {
                 var properties = _channel.CreateBasicProperties();
-                properties.DeliveryMode = 2;
+                properties.Persistent = true;
 
                 _channel.BasicPublish(
                     exchange: exchangeName,

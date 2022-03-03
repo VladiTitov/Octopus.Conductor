@@ -20,10 +20,10 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
         private readonly IConnectionFactory _connectionFactory;
         private readonly RabbitMQConfiguration _configuration;
         private readonly ILogger<RabbitMQConnection> _logger;
-        IDictionary<string, IModel> _channels;
-        Policy _policy;
-        IConnection _connection;
-        bool _disposed;
+        private IDictionary<string, IModel> _channels;
+        private Policy _policy;
+        private IConnection _connection;
+        private bool _disposed;
 
         public RabbitMQConnection(
             ILogger<RabbitMQConnection> logger,
@@ -201,7 +201,5 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
 
             TryConnect();
         }
-
-
     }
 }
