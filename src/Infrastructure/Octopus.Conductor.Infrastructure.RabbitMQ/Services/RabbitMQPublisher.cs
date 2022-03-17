@@ -8,7 +8,7 @@ using System;
 using System.Net.Sockets;
 using System.Text.Json;
 
-namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
+namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
 {
     public class RabbitMQPublisher : IMessagePublisher
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
-using Octopus.Conductor.Infrastructure.RabbitMQ.Service;
+using Octopus.Conductor.Infrastructure.RabbitMQ.Services;
 
 namespace Octopus.Conductor.Infrastructure.RabbitMQ
 {

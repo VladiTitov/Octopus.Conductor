@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 
-namespace Octopus.Conductor.Infrastructure.RabbitMQ.Service
+namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
 {
     public class RabbitMQConnection : IPersistanceConnection
     {
