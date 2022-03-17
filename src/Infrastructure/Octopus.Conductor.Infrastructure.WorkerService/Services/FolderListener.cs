@@ -1,8 +1,11 @@
-﻿using Octopus.Conductor.Application.Constants;
+﻿using Microsoft.Extensions.Options;
+using Octopus.Conductor.Application.Constants;
+using Octopus.Conductor.Application.Exceptions;
 using Octopus.Conductor.Application.Interfaces;
 using Octopus.Conductor.Domain.Entities;
+using Octopus.Conductor.Infrastructure.RabbitMQ.Config;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
-using Octopus.Conductor.Infrastructure.RabbitMQ.Service;
+using Octopus.Conductor.Infrastructure.RabbitMQ.Services;
 using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
 using System;
 using System.Collections.Concurrent;
@@ -18,13 +21,18 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
     {
         private readonly IRepository _repository;
         private readonly IMessagePublisher _publisher;
+        private readonly Publisher _publisherSettings;
         private ConcurrentQueue<Exception> _exceptions;
 
         public FolderListener(IRepository repository,
-            IMessagePublisher publisher)
+            IMessagePublisher publisher,
+            IOptions<RabbitMQConfiguration> configuration)
         {
             _repository = repository;
             _publisher = publisher;
+            _publisherSettings = configuration.Value.Publishers[RabbitMQConstants.FolderListnerPublisher]
+                ?? throw new IncorrectRabbitMQConfigurationException(
+                    $"Configuration file doesn't publisher with name: {RabbitMQConstants.FolderListnerPublisher}");
         }
 
         public async Task MoveEntityFilesAsync(CancellationToken cancellationToken = default)
@@ -86,9 +94,9 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
                     Type = desc.EntityType,
                     Path = destFilePath
                 },
-                channelName: RabbitMQConstants.FolderListnerChannelName,
-                exchangeName: RabbitMQConstants.FolderListnerExchangeName,
-                routingKey: RabbitMQConstants.FolderListnerRoutingKey);
+                channelName: _publisherSettings.Channel,
+                exchangeName: _publisherSettings.Exchange,
+                routingKey: _publisherSettings.RoutingKey);
                 
                 File.Delete(fileInfo.FullName);
             }

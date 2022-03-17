@@ -25,7 +25,7 @@ namespace Octopus.Conductor.WebApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<RabbitMQConfiguration>(Configuration.GetSection("RabbitMQConfiguration"));
+            services.Configure<RabbitMQConfiguration>(Configuration.GetSection("RabbitMQ"));
             services.AddRabbitMQConnection();
             services.AddRabbitMQPublisher();
 

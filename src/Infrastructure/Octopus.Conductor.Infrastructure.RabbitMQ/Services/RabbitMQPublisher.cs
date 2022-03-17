@@ -29,7 +29,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
         private Policy CreatePolicy() =>
             Policy.Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
-                .WaitAndRetry(RabbitMQConstants.RetryCount,
+                .WaitAndRetry(5,
                     retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                         {
                             _logger.LogWarning(ex,
