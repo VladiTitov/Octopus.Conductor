@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Octopus.Conductor.Application.Constants;
 using Octopus.Conductor.Application.Exceptions;
-using Octopus.Conductor.Infrastructure.RabbitMQ.Config;
+using Octopus.Conductor.Application.Settings.RabbitMQ;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
+using Octopus.Conductor.Application.Settings.Polly;
 using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -15,10 +15,11 @@ using System.Net.Sockets;
 
 namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
 {
+    //TODO: Add fabric to channels
     public class RabbitMQConnection : IPersistanceConnection
     {
         private readonly IConnectionFactory _connectionFactory;
-        private readonly RabbitMQConfiguration _configuration;
+        private readonly RabbitMQConfiguration _rabbitConfiguration;
         private readonly ILogger<RabbitMQConnection> _logger;
         private IDictionary<string, IModel> _channels;
         private Policy _policy;
@@ -27,22 +28,25 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
 
         public RabbitMQConnection(
             ILogger<RabbitMQConnection> logger,
-            IOptions<RabbitMQConfiguration> configuration)
+            IOptionsSnapshot<RabbitMQConfiguration> rabbitConfiguration,
+            IOptionsSnapshot<Application.Settings.Polly.Polly> pollyConfiguration)
         {
-            _configuration = configuration.Value;
+            _rabbitConfiguration = rabbitConfiguration.Value;
 
             _connectionFactory = new ConnectionFactory
             {
-                HostName = _configuration.Connection.Hostname,
-                Port = _configuration.Connection.Port,
-                UserName = _configuration.Connection.UserName,
-                Password = _configuration.Connection.Password,
-                VirtualHost = _configuration.Connection.VirtualHost,
+                HostName = _rabbitConfiguration.Connection.Hostname,
+                Port = _rabbitConfiguration.Connection.Port,
+                UserName = _rabbitConfiguration.Connection.UserName,
+                Password = _rabbitConfiguration.Connection.Password,
+                VirtualHost = _rabbitConfiguration.Connection.VirtualHost,
             };
 
             _logger = logger;
             _policy = CreatePolicy();
             _channels = new Dictionary<string, IModel>();
+
+            TryConnect();
         }
 
         private Policy CreatePolicy() =>
@@ -67,7 +71,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
                     "No RabbitMQ connections are available to perform this action");
             }
 
-            if (!_configuration.Channels.ContainsKey(channelName))
+            if (!_rabbitConfiguration.Channels.ContainsKey(channelName))
             {
                 throw new IncorrectRabbitMQConfigurationException(
                     $"Configuration file doesn't contain channel with name: {channelName}");
@@ -77,7 +81,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
                 return _channels[channelName];
 
             var channel = _connection.CreateModel();
-            var channelConf = _configuration.Channels[channelName];
+            var channelConf = _rabbitConfiguration.Channels[channelName];
 
             DeclareExchanges(channel, channelConf);
             DeclareQueues(channel, channelConf);

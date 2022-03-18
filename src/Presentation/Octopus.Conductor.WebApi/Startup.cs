@@ -4,9 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Octopus.Conductor.Application;
+using Octopus.Conductor.Application.Settings.RabbitMQ;
 using Octopus.Conductor.Infrastructure.RabbitMQ;
-using Octopus.Conductor.Infrastructure.RabbitMQ.Config;
 using Octopus.Conductor.Infrastructure.RelationalDB;
 using Octopus.Conductor.Infrastructure.WorkerService;
 using Octopus.Conductor.Infrastructure.WorkerService.Config;
@@ -32,10 +31,10 @@ namespace Octopus.Conductor.WebApi
             services.Configure<WorkerSettings>(Configuration.GetSection("WorkerSettings"));
             services.AddFolderListner();
             services.AddWorkerServices();
-            
+
             services.AddDbContext(Configuration);
             services.AddRepositories();
-            
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddControllers();
             services.AddSwaggerGen(c =>

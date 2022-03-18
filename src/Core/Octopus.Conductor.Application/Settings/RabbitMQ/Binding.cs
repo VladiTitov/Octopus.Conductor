@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Octopus.Conductor.Infrastructure.RabbitMQ.Config
+namespace Octopus.Conductor.Application.Settings.RabbitMQ
 {
     public class Binding
     {

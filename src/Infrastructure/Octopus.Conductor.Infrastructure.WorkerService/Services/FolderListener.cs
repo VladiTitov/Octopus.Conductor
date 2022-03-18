@@ -2,10 +2,9 @@
 using Octopus.Conductor.Application.Constants;
 using Octopus.Conductor.Application.Exceptions;
 using Octopus.Conductor.Application.Interfaces;
+using Octopus.Conductor.Application.Settings.RabbitMQ;
 using Octopus.Conductor.Domain.Entities;
-using Octopus.Conductor.Infrastructure.RabbitMQ.Config;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
-using Octopus.Conductor.Infrastructure.RabbitMQ.Services;
 using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
 using System;
 using System.Collections.Concurrent;
@@ -97,7 +96,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
                 channelName: _publisherSettings.Channel,
                 exchangeName: _publisherSettings.Exchange,
                 routingKey: _publisherSettings.RoutingKey);
-                
+
                 File.Delete(fileInfo.FullName);
             }
             catch (Exception ex)

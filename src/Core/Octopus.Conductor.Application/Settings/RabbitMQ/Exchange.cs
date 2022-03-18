@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace Octopus.Conductor.Infrastructure.RabbitMQ.Config
+namespace Octopus.Conductor.Application.Settings.RabbitMQ
 {
-    public class Queue
+    public class Exchange
     {
         public string Name { get; set; }
+        public string Type { get; set; }
         public bool Durable { get; set; }
-        public bool Exclusive { get; set; }
         public bool AutoDelete { get; set; }
         public IDictionary<string, object> Arguments { get; set; }
     }
