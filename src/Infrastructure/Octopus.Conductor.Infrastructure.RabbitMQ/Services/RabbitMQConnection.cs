@@ -20,7 +20,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
     {
         private readonly IConnectionFactory _connectionFactory;
         private readonly PollyConfig _pollyConfig;
-        private readonly RabbitMQConfiguration _rabbitConfiguration;
+        private readonly RabbitMQConfiguration _rabbitConfig;
         private readonly ILogger<RabbitMQConnection> _logger;
         private IDictionary<string, IModel> _channels;
         private Policy _policy;
@@ -29,18 +29,18 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
 
         public RabbitMQConnection(
             ILogger<RabbitMQConnection> logger,
-            IOptionsSnapshot<RabbitMQConfiguration> rabbitConfiguration,
+            IOptionsSnapshot<RabbitMQConfiguration> rabbitConfig,
             IOptionsSnapshot<PollyConfig> pollyConfig)
         {
-            _rabbitConfiguration = rabbitConfiguration.Value;
+            _rabbitConfig = rabbitConfig.Value;
 
             _connectionFactory = new ConnectionFactory
             {
-                HostName = _rabbitConfiguration.Connection.Hostname,
-                Port = _rabbitConfiguration.Connection.Port,
-                UserName = _rabbitConfiguration.Connection.UserName,
-                Password = _rabbitConfiguration.Connection.Password,
-                VirtualHost = _rabbitConfiguration.Connection.VirtualHost,
+                HostName = _rabbitConfig.Connection.Hostname,
+                Port = _rabbitConfig.Connection.Port,
+                UserName = _rabbitConfig.Connection.UserName,
+                Password = _rabbitConfig.Connection.Password,
+                VirtualHost = _rabbitConfig.Connection.VirtualHost,
             };
 
             _pollyConfig = pollyConfig.Value;
@@ -73,7 +73,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
                     "No RabbitMQ connections are available to perform this action");
             }
 
-            if (!_rabbitConfiguration.Channels.ContainsKey(channelName))
+            if (!_rabbitConfig.Channels.ContainsKey(channelName))
             {
                 throw new IncorrectRabbitMQConfigurationException(
                     $"Configuration file doesn't contain channel with name: {channelName}");
@@ -83,11 +83,13 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
                 return _channels[channelName];
 
             var channel = _connection.CreateModel();
-            var channelConf = _rabbitConfiguration.Channels[channelName];
+            var channelConf = _rabbitConfig.Channels[channelName];
 
             DeclareExchanges(channel, channelConf);
             DeclareQueues(channel, channelConf);
             DeclareBinds(channel, channelConf);
+
+            _channels.Add(channelName, channel);
 
             return channel;
         }
