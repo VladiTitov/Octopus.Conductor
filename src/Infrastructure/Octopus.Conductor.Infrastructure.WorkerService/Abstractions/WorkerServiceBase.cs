@@ -24,7 +24,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
         public WorkerServiceBase(ILogger logger, WorkerSettings settings, IServiceProvider serviceProvider)
         {
             if (settings.RepeatIntervalSeconds <= 0)
-                throw new IncorrectRepeatIntervalException(ErrorMessages.IncorrectRepeatInterval);
+                throw new IncorrectRepeatIntervalException("Incorrect repeat interval in seconds for worker service");
 
             _logger = logger;
             _settings = settings;
