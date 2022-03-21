@@ -87,15 +87,16 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Services
                 var destFilePath = Path.Combine(desc.OutputDirectory, fileInfo.Name);
                 File.Copy(fileInfo.FullName, destFilePath, true);
 
+
                 _publisher.Publish(
-                message: new
-                {
-                    Type = desc.EntityType,
-                    Path = destFilePath
-                },
-                channelName: _publisherSettings.Channel,
-                exchangeName: _publisherSettings.Exchange,
-                routingKey: _publisherSettings.RoutingKey);
+                    message: new EntityDescription
+                    {
+                        EntityType = desc.EntityType,
+                        EntityFilePath = destFilePath
+                    },
+                    channelName: _publisherSettings.Channel,
+                    exchangeName: _publisherSettings.Exchange,
+                    routingKey: _publisherSettings.RoutingKey);
 
                 File.Delete(fileInfo.FullName);
             }
