@@ -1,6 +1,6 @@
 ﻿namespace Octopus.Conductor.Application.Settings.Polly
 {
-    public class Polly
+    public class PollyConfig
     {
         public int RetryCount { get; set; }
     }

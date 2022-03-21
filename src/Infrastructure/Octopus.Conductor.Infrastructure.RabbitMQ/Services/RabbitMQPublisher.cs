@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Octopus.Conductor.Application.Constants;
+using Octopus.Conductor.Application.Settings.Polly;
 using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
 using Polly;
 using RabbitMQ.Client;
@@ -14,22 +16,25 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
     {
         private readonly IPersistanceConnection _connection;
         private readonly ILogger<RabbitMQPublisher> _logger;
+        private readonly PollyConfig _pollyConfig;
         private IModel _channel;
         private Policy _policy;
         private object _lock = new object();
 
         public RabbitMQPublisher(IPersistanceConnection connection,
-            ILogger<RabbitMQPublisher> logger)
+            ILogger<RabbitMQPublisher> logger,
+            IOptionsSnapshot<PollyConfig> pollyConfig)
         {
             _connection = connection;
             _logger = logger;
+            _pollyConfig = pollyConfig.Value;
             _policy = CreatePolicy();
         }
 
         private Policy CreatePolicy() =>
             Policy.Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
-                .WaitAndRetry(5,
+                .WaitAndRetry(_pollyConfig.RetryCount,
                     retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                         {
                             _logger.LogWarning(ex,

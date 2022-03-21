@@ -19,6 +19,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
     public class RabbitMQConnection : IPersistanceConnection
     {
         private readonly IConnectionFactory _connectionFactory;
+        private readonly PollyConfig _pollyConfig;
         private readonly RabbitMQConfiguration _rabbitConfiguration;
         private readonly ILogger<RabbitMQConnection> _logger;
         private IDictionary<string, IModel> _channels;
@@ -29,7 +30,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
         public RabbitMQConnection(
             ILogger<RabbitMQConnection> logger,
             IOptionsSnapshot<RabbitMQConfiguration> rabbitConfiguration,
-            IOptionsSnapshot<Application.Settings.Polly.Polly> pollyConfiguration)
+            IOptionsSnapshot<PollyConfig> pollyConfig)
         {
             _rabbitConfiguration = rabbitConfiguration.Value;
 
@@ -42,6 +43,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
                 VirtualHost = _rabbitConfiguration.Connection.VirtualHost,
             };
 
+            _pollyConfig = pollyConfig.Value;
             _logger = logger;
             _policy = CreatePolicy();
             _channels = new Dictionary<string, IModel>();
@@ -52,7 +54,7 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
         private Policy CreatePolicy() =>
             Policy.Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
-                .WaitAndRetry(5,
+                .WaitAndRetry(_pollyConfig.RetryCount,
                     retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                     {
                         _logger.LogWarning(ex,
