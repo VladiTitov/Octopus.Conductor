@@ -65,7 +65,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
                 _logger.LogWarning(ex,
                     "Execution Canceled",
                     stoppingToken.IsCancellationRequested);
-                Status = WorkerServiseStatus.Stoped;
+                Status = WorkerServiseStatus.Stopped;
             }
             catch (Exception ex)
             {

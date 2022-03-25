@@ -6,9 +6,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Octopus.Conductor.Application.Settings.RabbitMQ;
 using Octopus.Conductor.Infrastructure.RabbitMQ;
-using Octopus.Conductor.Infrastructure.RelationalDB;
 using Octopus.Conductor.Infrastructure.WorkerService;
 using Octopus.Conductor.Infrastructure.WorkerService.Config;
+using Octopus.Conductor.Infrastructure.RelationalDB;
 using System;
 
 namespace Octopus.Conductor.WebApi

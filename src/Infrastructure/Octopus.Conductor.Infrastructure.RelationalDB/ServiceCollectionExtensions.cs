@@ -8,10 +8,13 @@ namespace Octopus.Conductor.Infrastructure.RelationalDB
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddDbContext(this IServiceCollection services, IConfiguration configuration) =>
+        public static void AddDbContext(this IServiceCollection services, IConfiguration configuration)
+        {
+
+            var a = configuration.GetConnectionString("SQLiteConnection");
             services.AddDbContext<EntitiesDbContext>(options =>
-                options.UseInMemoryDatabase(
-                    databaseName: "InMemory"));
+                options.UseSqlite(configuration.GetConnectionString("SQLiteConnection")));
+        }
 
         public static void AddRepositories(this IServiceCollection services) =>
             services.AddScoped<IRepository, EfRepository>();
