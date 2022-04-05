@@ -6,6 +6,6 @@ namespace Octopus.Conductor.Application.Settings.RabbitMQ
     {
         public Connection Connection { get; set; }
         public IDictionary<string, Channel> Channels { get; set; }
-        public IDictionary<string,Publisher> Publishers { get; set; }
+        public IDictionary<string, Publisher> Publishers { get; set; }
     }
 }

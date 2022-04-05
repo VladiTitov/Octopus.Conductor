@@ -170,8 +170,8 @@ namespace Octopus.Conductor.Infrastructure.RabbitMQ.Services
                 _connection.ConnectionBlocked += OnConnectionBlocked;
 
                 _logger.LogInformation(
-                    "RabbitMQ Client acquired a persistent connection to '{HostName}' and is subscribed to failure events"
-                    , _connection.Endpoint.HostName);
+                    "RabbitMQ Client acquired a persistent connection to '{HostName}' and is subscribed to failure events",
+                     _connection.Endpoint.HostName);
 
                 return true;
             }
