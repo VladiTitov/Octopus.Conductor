@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Octopus.Conductor.Application.Constants;
 using Octopus.Conductor.Application.Enums;
@@ -12,28 +13,33 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
 {
     public abstract class WorkerServiceBase : IHostedService, IDisposable
     {
+        private readonly ILogger _logger;
+        private readonly WorkerSettings _settings;
+        private readonly IServiceProvider _serviceProvider;
         private Task _executingTask;
         private CancellationTokenSource _stoppingCts;
-        private ILogger _logger;
-        private readonly WorkerSettings _settings;
+
         public WorkerServiseStatus Status { get; private set; }
 
-        public WorkerServiceBase(ILogger logger, WorkerSettings settings)
+        public WorkerServiceBase(ILogger logger, WorkerSettings settings, IServiceProvider serviceProvider)
         {
             if (settings.RepeatIntervalSeconds <= 0)
-                throw new IncorrectRepeatIntervalException(ErrorMessages.IncorrectRepeatInterval);
+                throw new IncorrectRepeatIntervalException("Incorrect repeat interval in seconds for worker service");
 
             _logger = logger;
             _settings = settings;
+            _serviceProvider = serviceProvider;
             Status = WorkerServiseStatus.Created;
         }
 
-        public abstract Task DoWorkAsync(CancellationToken stoppingToken);
+        public abstract Task DoWorkAsync(IServiceScope scope, CancellationToken stoppingToken);
         public abstract void ExceptionHandle(Exception exception);
         protected virtual async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
+                using var scope = _serviceProvider.CreateScope();
+
                 _logger.LogInformation("Background service is started");
                 Status = WorkerServiseStatus.Running;
 
@@ -41,7 +47,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
                 {
                     try
                     {
-                        await DoWorkAsync(stoppingToken).ConfigureAwait(false);
+                        await DoWorkAsync(scope, stoppingToken).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -59,7 +65,7 @@ namespace Octopus.Conductor.Infrastructure.WorkerService.Abstractions
                 _logger.LogWarning(ex,
                     "Execution Canceled",
                     stoppingToken.IsCancellationRequested);
-                Status = WorkerServiseStatus.Stoped;
+                Status = WorkerServiseStatus.Stopped;
             }
             catch (Exception ex)
             {

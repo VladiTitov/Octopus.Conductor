@@ -1,5 +1,11 @@
-﻿using Octopus.Conductor.Application.Interfaces;
+﻿using Microsoft.Extensions.Options;
+using Octopus.Conductor.Application.Constants;
+using Octopus.Conductor.Application.Exceptions;
+using Octopus.Conductor.Application.Interfaces;
+using Octopus.Conductor.Application.Settings.RabbitMQ;
 using Octopus.Conductor.Domain.Entities;
+using Octopus.Conductor.Infrastructure.RabbitMQ.Interfaces;
+using Octopus.Conductor.Infrastructure.WorkerService.Abstractions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,16 +14,24 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Octopus.Conductor.Application.Services
+namespace Octopus.Conductor.Infrastructure.WorkerService.Services
 {
     public class FolderListener : IFolderListener
     {
         private readonly IRepository _repository;
+        private readonly IMessagePublisher _publisher;
+        private readonly Publisher _publisherSettings;
         private ConcurrentQueue<Exception> _exceptions;
 
-        public FolderListener(IRepository repository)
+        public FolderListener(IRepository repository,
+            IMessagePublisher publisher,
+            IOptions<RabbitMQConfiguration> configuration)
         {
             _repository = repository;
+            _publisher = publisher;
+            _publisherSettings = configuration.Value.Publishers[RabbitMQConstants.FolderListnerPublisher]
+                ?? throw new IncorrectRabbitMQConfigurationException(
+                    $"Configuration file doesn't publisher with name: {RabbitMQConstants.FolderListnerPublisher}");
         }
 
         public async Task MoveEntityFilesAsync(CancellationToken cancellationToken = default)
@@ -58,22 +72,33 @@ namespace Octopus.Conductor.Application.Services
 
                   inputDirInfo.EnumerateFiles("*", SearchOption.AllDirectories)
                   .ToList()
-                  .ForEach(info => {
+                  .ForEach(info =>
+                  {
                       cancellationToken.ThrowIfCancellationRequested();
-                      MoveFile(info,desc.OutputDirectory);
+                      MoveFile(info, desc);
                   });
               });
         }
 
-        private void MoveFile(FileInfo fileInfo,string destDir)
+        private void MoveFile(FileInfo fileInfo, ConductorEntityDescription desc)
         {
             try
             {
-                File.Move(fileInfo.FullName, Path.Combine(destDir, fileInfo.Name));
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
+                var destFilePath = Path.Combine(desc.OutputDirectory, fileInfo.Name);
+                File.Copy(fileInfo.FullName, destFilePath, true);
+
+
+                _publisher.Publish(
+                    message: new EntityDescription
+                    {
+                        EntityType = desc.EntityType,
+                        EntityFilePath = destFilePath
+                    },
+                    channelName: _publisherSettings.Channel,
+                    exchangeName: _publisherSettings.Exchange,
+                    routingKey: _publisherSettings.RoutingKey);
+
+                File.Delete(fileInfo.FullName);
             }
             catch (Exception ex)
             {

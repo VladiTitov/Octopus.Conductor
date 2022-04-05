@@ -17,11 +17,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{5ED6A24B-E342-4AEE-BE49-265232C10326}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Application", "src\Core\Octopus.Conductor.Application\Octopus.Conductor.Application.csproj", "{0F38CB86-B8E2-4B2F-9A40-04CF02A40CC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octopus.Conductor.Application", "src\Core\Octopus.Conductor.Application\Octopus.Conductor.Application.csproj", "{0F38CB86-B8E2-4B2F-9A40-04CF02A40CC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Infrastructure.Services", "src\Infrastructure\Octopus.Conductor.Infrastructure.Services\Octopus.Conductor.Infrastructure.Services.csproj", "{B9EADB5B-8AF1-429F-9E09-42DF435BC58E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octopus.Conductor.Infrastructure.Services", "src\Infrastructure\Octopus.Conductor.Infrastructure.Services\Octopus.Conductor.Infrastructure.Services.csproj", "{B9EADB5B-8AF1-429F-9E09-42DF435BC58E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Infrastructure.WorkerService", "src\Infrastructure\Octopus.Conductor.Infrastructure.WorkerService\Octopus.Conductor.Infrastructure.WorkerService.csproj", "{11924E27-D08A-4503-A05F-2B929383C818}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octopus.Conductor.Infrastructure.WorkerService", "src\Infrastructure\Octopus.Conductor.Infrastructure.WorkerService\Octopus.Conductor.Infrastructure.WorkerService.csproj", "{11924E27-D08A-4503-A05F-2B929383C818}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Octopus.Conductor.Infrastructure.RabbitMQ", "src\Infrastructure\Octopus.Conductor.Infrastructure.RabbitMQ\Octopus.Conductor.Infrastructure.RabbitMQ.csproj", "{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{11924E27-D08A-4503-A05F-2B929383C818}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11924E27-D08A-4503-A05F-2B929383C818}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11924E27-D08A-4503-A05F-2B929383C818}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{0F38CB86-B8E2-4B2F-9A40-04CF02A40CC8} = {77C393FB-BEE3-4E46-8B10-3555BC545675}
 		{B9EADB5B-8AF1-429F-9E09-42DF435BC58E} = {BD4E626C-1B38-49D8-8217-394DA4158EB4}
 		{11924E27-D08A-4503-A05F-2B929383C818} = {BD4E626C-1B38-49D8-8217-394DA4158EB4}
+		{E3E3B7DC-D965-4C49-A183-46FDA26AB2CF} = {BD4E626C-1B38-49D8-8217-394DA4158EB4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5037395-1809-4148-A8EB-0523B0AAC1FE}

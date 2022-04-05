@@ -4,7 +4,7 @@
     {
         Created,
         Running,
-        Stoped,
+        Stopped,
         Faulted,
         Completed
     }

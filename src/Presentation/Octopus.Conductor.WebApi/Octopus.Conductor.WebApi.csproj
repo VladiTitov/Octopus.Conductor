@@ -2,17 +2,30 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>33464e5d-1710-421a-997f-73ed20be7be8</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.15">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Octopus.Conductor.Application\Octopus.Conductor.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Octopus.Conductor.Infrastructure.RabbitMQ\Octopus.Conductor.Infrastructure.RabbitMQ.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Octopus.Conductor.Infrastructure.RelationalDB\Octopus.Conductor.Infrastructure.RelationalDB.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Octopus.Conductor.Infrastructure.WorkerService\Octopus.Conductor.Infrastructure.WorkerService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>
